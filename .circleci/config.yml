@@ -172,6 +172,7 @@ jobs:
   run-migrations:
     docker:
       # Docker image here that supports NodeJS
+      - image: amazon/aws-cli
     steps:
       # Checkout code from git
       - run:
