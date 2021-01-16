@@ -82,6 +82,7 @@ jobs:
       - checkout
       # Restore from cache
       # Your job code here
+      - run: echo "hello world"
 
   test-backend:
     docker:
@@ -92,6 +93,7 @@ jobs:
       - checkout
       # Restore from cache
       # Your job code here
+      - run: echo "hello world"
 
   scan-frontend:
     docker:
@@ -101,6 +103,7 @@ jobs:
       # Checkout code from git
       # Restore from cache
       # Your job code here
+      - run: echo "hello world"
 
   scan-backend:
     docker:
@@ -110,6 +113,7 @@ jobs:
       # Checkout code from git
       # Restore from cache
       # Your job code here
+      - run: echo "hello world"
 
   deploy-infrastructure:
     docker:
