@@ -5,6 +5,9 @@ commands:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
     parameters:
       # Add parameter here
+      print_value:
+        type: string
+        default: Nothing
     steps:
       - run:
           name: Destroy environments
@@ -17,6 +20,9 @@ commands:
     description: Revert the last migration if successfully run in the current workflow.
     parameters:
       # Add parameter here
+      print_value:
+        type: string
+        default: Nothing
     steps:
       - run:
           name: Revert migrations
@@ -70,22 +76,27 @@ jobs:
   test-frontend:
     docker:
       # Docker image here
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
+      - checkout
       # Restore from cache
       # Your job code here
 
   test-backend:
     docker:
       # Docker image here
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
+      - checkout
       # Restore from cache
       # Your job code here
 
   scan-frontend:
     docker:
       # Docker image here
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       # Restore from cache
@@ -94,6 +105,7 @@ jobs:
   scan-backend:
     docker:
       # Docker image here
+      - image: circleci/node:13.8.0
     steps:
       # Checkout code from git
       # Restore from cache
@@ -138,17 +150,20 @@ jobs:
       # Docker image here that supports Ansible
     steps:
       # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["54:77:1c:30:84:c7:1b:a8:dd:5e:27:85:b6:87:1e:31"]
       # attach workspace
       - run:
           name: Install dependencies
           command: |
-            # Your code here
+            npm i
             exit 1
       - run:
           name: Configure server
           command: |
-            # Your code here
+            npm i
             exit 1
       # Here's where you will add some code to rollback on failure
 
@@ -160,12 +175,12 @@ jobs:
       - run:
           name: Run migrations
           command: |
-            # Your code here
+            npm i
             exit 1
       - run:
           name: Send migration results to memstash
           command: |
-            # Your code here
+            npm i
             exit 1
       # Here's where you will add some code to rollback on failure
 
@@ -177,17 +192,17 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            npm i
       - run:
           name: Get backend url
           command: |
-            # your code here
+            npm i
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
       - run:
           name: Deploy frontend objects
           command: |
-            # your code here
+            npm i
       # Here's where you will add some code to rollback on failure
 
   deploy-backend:
@@ -195,27 +210,30 @@ jobs:
       # Docker image here that supports Ansible
     steps:
       # Checkout code from git
+      - checkout
       # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["54:77:1c:30:84:c7:1b:a8:dd:5e:27:85:b6:87:1e:31"]
       # attach workspace
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            npm i
       - run:
           name: Deploy backend
           command: |
-            # your code here
+            npm i
       # Here's where you will add some code to rollback on failure
 
   smoke-test:
     docker:
-      # Lightweight Docker image
+      - image: python:3.7-alpine3.11
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
-            # your code here
+            apk add --update ansible # install the dependencies needed for your playbook
       - run:
           name: Get backend url
           command: |
@@ -254,10 +272,10 @@ cleanup:
     # Docker image here
   steps:
     # Checkout code from git
+    - checkout
     - run:
         name: Get old stack workflow id
         command: |
-          # your code here
           export OldWorkflowID="the id here"
           export STACKS=[] #put the list of stacks here
     - run:
@@ -265,22 +283,27 @@ cleanup:
         command: |
           if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
           then
-            # your code here
+            aws s3 rm s3://$OldPipelineID --recursive
+            aws cloudformation delete-stack --stack-name $PreviousStackName
           fi
 
 workflows:
-  default:
+  frontend:
     jobs:
       - build-frontend
-      - build-backend
       - test-frontend:
           requires: [build-frontend]
+      - scan-frontend:
+          requires: [build-frontend]
+  backend:
+    jobs:
+      - build-backend
       - test-backend:
           requires: [build-backend]
       - scan-backend:
           requires: [build-backend]
-      - scan-frontend:
-          requires: [build-frontend]
+  deploy:
+    jobs:
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
