@@ -276,26 +276,26 @@ jobs:
             --parameter-overrides PipelineID="chez-${CIRCLE_WORKFLOW_ID:0:7}"
       # Here's where you will add some code to rollback on failure
 
-cleanup:
-  docker:
-    # Docker image here
-    - image: amazon/aws-cli
-  steps:
-    # Checkout code from git
-    - checkout
-    - run:
-        name: Get old stack workflow id
-        command: |
-          export OldWorkflowID="the id here"
-          export STACKS=[] #put the list of stacks here
-    - run:
-        name: Remove old stacks and files
-        command: |
-          if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
-          then
-            aws s3 rm s3://$OldPipelineID --recursive
-            aws cloudformation delete-stack --stack-name $PreviousStackName
-          fi
+  cleanup:
+    docker:
+      # Docker image here
+      - image: amazon/aws-cli
+    steps:
+      # Checkout code from git
+      - checkout
+      - run:
+          name: Get old stack workflow id
+          command: |
+            export OldWorkflowID="the id here"
+            export STACKS=[] #put the list of stacks here
+      - run:
+          name: Remove old stacks and files
+          command: |
+            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+            then
+              aws s3 rm s3://$OldPipelineID --recursive
+              aws cloudformation delete-stack --stack-name $PreviousStackName
+            fi
 
 workflows:
   frontend:
