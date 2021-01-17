@@ -67,9 +67,9 @@ jobs:
       - run:
           name: Back-end build
           command: |
-            ls
             cd backend
             npm i
+            ls
             npm run build
       - save_cache:
           paths: [backend/node_modules]
@@ -94,8 +94,8 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - run: ls
       - run: cd backend
+      - run: ls
       - run: npm run test
 
   scan-frontend:
