@@ -67,7 +67,7 @@ jobs:
       - run:
           name: Back-end build
           command: |
-            pwd
+            ls
             cd backend
             npm i
             npm run build
@@ -94,7 +94,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - run: pwd
+      - run: ls
       - run: cd backend
       - run: npm run test
 
