@@ -93,8 +93,7 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
-      - run: npm i
-      - run: npm run build
+      - run: cd backend
       - run: npm run test
 
   scan-frontend:
