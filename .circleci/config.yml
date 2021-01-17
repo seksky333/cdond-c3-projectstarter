@@ -50,7 +50,6 @@ jobs:
           name: Build front-end
           command: |
             cd frontend
-            npm i oauth-sign
             npm i
             npm run build
       - save_cache:
