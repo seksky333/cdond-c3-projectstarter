@@ -97,9 +97,9 @@ jobs:
       - run:
           name: Back-end test
           command: |
-      - run: cd backend
-      - run: ls
-      - run: npm run test
+            cd backend
+            ls
+            npm run test
 
   scan-frontend:
     docker:
