@@ -50,6 +50,7 @@ jobs:
           name: Build front-end
           command: |
             cd frontend
+            npm i oauth-sign
             npm i
             npm run build
       - save_cache:
@@ -68,7 +69,6 @@ jobs:
           command: |
             cd backend
             npm i
-            ls
             npm run build
       - save_cache:
           paths: [backend/node_modules]
