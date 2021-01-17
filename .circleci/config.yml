@@ -94,6 +94,9 @@ jobs:
       - checkout
       - restore_cache:
           keys: [backend-build]
+      - run:
+          name: Back-end test
+          command: |
       - run: cd backend
       - run: ls
       - run: npm run test
