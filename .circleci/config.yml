@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  node: "circleci/node:4.1"
   slack: circleci/slack@4.1
 
 commands:
@@ -127,9 +128,8 @@ jobs:
           when: on_fail
 
   scan-backend:
-    docker:
-      # Docker image here
-      - image: circleci/node:13.8.0
+    executor:
+      name: node/default
     steps:
       - checkout
       - restore_cache:
@@ -138,15 +138,9 @@ jobs:
           name: Backend vulnerability check
           command: |
             cd backend
-            npm audit --audit-level=critical
-      - run:
-          name: Backend fix vulnerabilities
-          command: |
-            cd backend
             npm update
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
-          when: on_fail
       - slack/notify:
           event: fail
           template: basic_fail_1
