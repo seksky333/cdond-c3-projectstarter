@@ -118,7 +118,9 @@ jobs:
             npm audit --audit-level=critical
       - run:
           name: Frontend fix vulnerabilities
-          command: npm audit fix --audit-level=critical --force
+          command: |
+            cd frontend
+            npm audit fix --audit-level=critical --force
           when: on_fail
 
   scan-backend:
@@ -136,7 +138,9 @@ jobs:
             npm audit --audit-level=critical
       - run:
           name: Backend fix vulnerabilities
-          command: npm audit fix --audit-level=critical --force
+          command: |
+            cd backend
+            npm audit fix --audit-level=critical --force
           when: on_fail
 
   deploy-infrastructure:
