@@ -137,7 +137,6 @@ jobs:
       - run:
           name: Backend vulnerability check
           command: |
-            return 1
             cd backend
             npm update
             npm audit fix --audit-level=critical --force
