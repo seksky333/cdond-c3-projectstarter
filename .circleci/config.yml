@@ -345,12 +345,12 @@ workflows:
           requires: [build-frontend]
       - scan-frontend:
           requires: [build-frontend]
-      - build-backend:
-          context: slack-secrets
+      - build-backend
       - test-backend:
           requires: [build-backend]
       - scan-backend:
           requires: [build-backend]
+          context: slack-secrets
       - deploy-infrastructure:
           requires: [test-frontend, test-backend, scan-frontend, scan-backend]
           filters:
