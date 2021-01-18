@@ -138,13 +138,14 @@ jobs:
           name: Backend vulnerability check
           command: |
             cd backend
-            npm update
             npm audit --audit-level=critical
       - run:
           name: Backend fix vulnerabilities
           command: |
             cd backend
+            npm update
             npm audit fix --audit-level=critical --force
+            npm audit --audit-level=critical
           when: on_fail
 
   deploy-infrastructure:
