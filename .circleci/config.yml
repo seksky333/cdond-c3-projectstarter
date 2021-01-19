@@ -170,7 +170,7 @@ jobs:
             list-exports --query "Exports[?Name==\`BackendIP\`].Value" \
             --no-paginate --output text > ~/inventory.txt
             cat ~/inventory.txt
-      #
+      #12
       # - destroy-environment:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
