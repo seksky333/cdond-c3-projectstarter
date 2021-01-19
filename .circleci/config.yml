@@ -166,10 +166,11 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
+            pwd
             aws cloudformation \
             list-exports --query "Exports[?Name==\`BackendIP\`].Value" \
-            --no-paginate --output text > ~/.circleci/ansible/inventory.txt
-            cat ~/.circleci/ansible/inventory.txt
+            --no-paginate --output text > project/.circleci/ansible/inventory.txt
+            cat project/.circleci/ansible/inventory.txt
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
