@@ -4,7 +4,7 @@ Description: >
 Parameters:
   ID:
     Description: Unique identifier.
-    Type: Stringgg
+    Type: String
 
 Resources:
   InstanceSecurityGroup:
@@ -23,7 +23,7 @@ Resources:
           CidrIp: 0.0.0.0/0
 
   EC2Instance:
-    Type: AWS::EC2::Instance
+    Type: AWS::EC2::Instances
     Properties:
       InstanceType: t2.micro
       SecurityGroups:
