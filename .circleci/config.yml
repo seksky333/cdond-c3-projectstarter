@@ -344,7 +344,7 @@ workflows:
       #     filters:
       #       branches:
       #         only: [master]
-      - deploy-infrastructure:
+      - deploy-infrastructure
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
