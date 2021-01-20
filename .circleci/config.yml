@@ -216,7 +216,7 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            npm run migrations > migration_result.txx
+            npm run migrations > migration_result.txt
             cat migration_result.txt
           no_output_timeout: 30m
 
