@@ -217,39 +217,50 @@ jobs:
           command: |
             cd backend
             npm run migrations > migration_result.txt
-            cat migration_result.txt
           no_output_timeout: 30m
 
       - run:
           name: Send migration results to memstash
           command: |
-            echo $MEMSTASH_TOKEN
-            curl -H "Content-Type: text/plain" -H "token: $MEMSTASH_TOKEN" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
-            curl -H "Content-Type: text/plain" -H "token: $MEMSTASH_TOKEN" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+            cat migration_result.txt
+            if grep -q "has been executed successfully" migration_result.txt
+            then
+              echo "DB migration was successful, will update memstash..."
+              curl -H "Content-Type: text/plain" -H "token: $MEMSTASH_TOKEN" --request PUT --data "success" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+            else
+              echo "DB migration failed, please verify setup! Probably the database already exists. Verify setup!"
+              curl -H "Content-Type: text/plain" -H "token: $MEMSTASH_TOKEN" --request PUT --data "failed" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+            fi
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     docker:
-      # Docker image here that supports AWS CLI
       - image: amazon/aws-cli
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Install dependencies
           command: |
-            npm i
+            yum install -y tar
+            yum install -y gzip
+      - attach_workspace:
+          at: ~/
       - run:
           name: Get backend url
           command: |
-            npm i
+            echo ~/inventory.txt
+            BACKEND_IP=$(cat ~/inventory.txt)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
       - run:
           name: Deploy frontend objects
           command: |
-            npm i
-      # Here's where you will add some code to rollback on failure
+            npm run build
+            ls ./dist
+            aws s3 sync ./dist s3://"udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --delete
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-backend:
     docker:
