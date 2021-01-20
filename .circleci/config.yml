@@ -258,6 +258,7 @@ jobs:
           name: Deploy frontend objects
           command: |
             cd frontend
+            npm i
             npm run build
             ls ./dist
             aws s3 sync ./dist s3://"udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --delete
@@ -267,7 +268,7 @@ jobs:
   deploy-backend:
     docker:
       # Docker image here that supports Ansiblez
-      - image: amazon/aws-cli
+      - image: python:3.7-alpine3.11
     steps:
       - checkout
       - run: yum install -y tar gzip
