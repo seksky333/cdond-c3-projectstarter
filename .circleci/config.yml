@@ -267,21 +267,23 @@ jobs:
       # Docker image here that supports Ansible
       - image: amazon/aws-cli
     steps:
-      # Checkout code from git
       - checkout
-      # Add ssh keys with fingerprint
       - add_ssh_keys:
-          fingerprints: ["54:77:1c:30:84:c7:1b:a8:dd:5e:27:85:b6:87:1e:31"]
-      # attach workspace
+          fingerprints: ["6b:0d:d5:b7:0c:7a:57:3e:78:a6:22:2d:3f:22:40:c0"]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
-            npm i
+            apk add --update ansible curl nodejs npm
+            ansible --version
       - run:
           name: Deploy backend
           command: |
-            npm i
-      # Here's where you will add some code to rollback on failure
+            .circleci/
+            ansible-playbook -i ~/inventory1txt .circleci/ansible/deploy-backend.yml
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
     docker:
