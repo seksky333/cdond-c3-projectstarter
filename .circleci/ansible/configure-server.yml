@@ -23,7 +23,7 @@
     ENVIRONMENT: production
     TYPEORM_CONNECTION: postgres
     TYPEORM_ENTITIES: ./src/modules/domain/**
-    TYPEORM_HOST:
+    TYPEORM_HOST: udapeople-prod.cgobnho8mpje.ap-southeast-2.rds.amazonaws.com
     TYPEORM_PORT: 5532
     TYPEORM_USERNAME: udapeople
     TYPEORM_PASSWORD: udapeople123

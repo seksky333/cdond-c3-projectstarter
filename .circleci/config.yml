@@ -342,11 +342,11 @@ workflows:
       - scan-backend:
           requires: [build-backend]
           context: slack-secrets
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #     filters:
-      #       branches:
-      #         only: [master]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [master]
       - run-migrations:
           requires: [scan-backend]
       # - configure-infrastructure:
