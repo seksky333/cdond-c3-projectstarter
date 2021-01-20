@@ -208,6 +208,7 @@ jobs:
             npm i
             npm run migrations > migration_result.txx
             cat migration_result.txt
+          no_output_timeout: 30m
 
       - run:
           name: Send migration results to memstash
