@@ -198,15 +198,17 @@ jobs:
 
   run-migrations:
     docker:
-      # Docker image here that supports NodeJS
-      - image: amazon/aws-cli
+      - image: circleci/node:13.8.0
     steps:
-      # Checkout code from git
+      - checkout
       - run:
           name: Run migrations
           command: |
+            cd backend
             npm i
-            exit 1
+            npm run migrations > migration_result.txx
+            cat migration_result.txt
+
       - run:
           name: Send migration results to memstash
           command: |
@@ -339,7 +341,7 @@ workflows:
       #     filters:
       #       branches:
       #         only: [master]
-      - deploy-infrastructure
+      - - run-migrations
       - configure-infrastructure:
           requires: [deploy-infrastructure]
       - run-migrations:
