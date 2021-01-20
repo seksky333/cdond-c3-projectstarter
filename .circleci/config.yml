@@ -265,7 +265,7 @@ jobs:
 
   deploy-backend:
     docker:
-      # Docker image here that supports Ansible
+      # Docker image here that supports Ansiblez
       - image: amazon/aws-cli
     steps:
       - checkout
