@@ -212,7 +212,6 @@ jobs:
           name: Run migrations
           command: |
             cd backend
-            npm i
             npm run migrations > migration_result.txx
             cat migration_result.txt
           no_output_timeout: 30m
@@ -220,9 +219,11 @@ jobs:
       - run:
           name: Send migration results to memstash
           command: |
-            npm i
-            exit 1
-      # Here's where you will add some code to rollback on failure
+            echo $MEMSTASH_TOKEN
+            curl -H "Content-Type: text/plain" -H "token: $MEMSTASH_TOKEN" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+            curl -H "Content-Type: text/plain" -H "token: $MEMSTASH_TOKEN" --request GET https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     docker:
