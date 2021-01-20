@@ -136,6 +136,9 @@ jobs:
             # npm update
             # npm audit fix --audit-level=critical --force
             # npm audit --audit-level=critical
+      - save_cache:
+          paths: [backend/node_modules]
+          key: backend-build
       - slack/notify:
           event: fail
           template: basic_fail_1
@@ -201,6 +204,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Run migrations
           command: |
@@ -331,18 +336,19 @@ workflows:
       #     requires: [build-frontend]
       # - scan-frontend:
       #     requires: [build-frontend]
-      # - build-backend
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      #     context: slack-secrets
+      - build-backend
+      - test-backend:
+          requires: [build-backend]
+      - scan-backend:
+          requires: [build-backend]
+          context: slack-secrets
       # - deploy-infrastructure:
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
       #     filters:
       #       branches:
       #         only: [master]
-      - run-migrations
+      - run-migrations:
+          requires: [scan-backend]
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
       # - run-migrations:
