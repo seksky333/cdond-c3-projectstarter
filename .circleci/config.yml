@@ -331,11 +331,11 @@ jobs:
 workflows:
   lifecycle_workflow:
     jobs:
-      # - build-frontend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
+      - build-frontend
+      - test-frontend:
+          requires: [build-frontend]
+      - scan-frontend:
+          requires: [build-frontend]
       - build-backend
       - test-backend:
           requires: [build-backend]
@@ -347,12 +347,10 @@ workflows:
           filters:
             branches:
               only: [master]
+      - configure-infrastructure:
+          requires: [deploy-infrastructure]
       - run-migrations:
-          requires: [scan-backend]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
+          requires: [configure-infrastructure]
       - deploy-frontend:
           requires: [run-migrations]
       - deploy-backend:
