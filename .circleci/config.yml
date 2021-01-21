@@ -258,6 +258,7 @@ jobs:
           name: Send migration results to memstash
           command: |
             cat ~/migration_result.txt
+            echo migration_${CIRCLE_WORKFLOW_ID:0:7}
             if grep -q "has been executed successfully" ~/migration_result.txt
             then
               echo "DB migration was successful, will update memstash..."
@@ -324,11 +325,9 @@ jobs:
           name: Deploy backend
           command: |
             ls
-            ls ~
             cat inventory.txt
-            cd .circleci/ansible
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i inventory.txt deploy-backend.yml -vv
+            ansible-playbook -i inventory.txt .circleci/ansible/deploy-backend.yml -vv
           no_output_timeout: 10m
       # - destroy-environment:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
