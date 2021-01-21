@@ -278,7 +278,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible curl rsync nodejs npm
+            apk add --update ansible curl rsync nodejs npm openssh
             ansible --version
             pip install awscli
             aws --version
