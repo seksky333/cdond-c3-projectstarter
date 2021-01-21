@@ -48,7 +48,7 @@ jobs:
             cd frontend
             npm i
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - frontend/node_modules
 
@@ -63,7 +63,7 @@ jobs:
             cd backend
             npm i
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - backend/node_modules
 
@@ -73,7 +73,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Build front-end
           command: |
@@ -86,7 +86,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Back-end build
           command: |
@@ -94,7 +94,7 @@ jobs:
             npm i
             npm run build
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - backend/dist
 
@@ -105,7 +105,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Front-end test
           command: |
@@ -121,7 +121,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Back-end test
           command: |
@@ -135,7 +135,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Front-end vulnerability check
           command: |
@@ -148,7 +148,7 @@ jobs:
             npm audit fix --audit-level=critical --force
           when: on_fail
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - frontend/node_modules
 
@@ -158,7 +158,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Backend vulnerability check
           command: |
@@ -173,7 +173,7 @@ jobs:
           event: fail
           template: basic_fail_1
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - backend/node_modules
 
@@ -211,7 +211,7 @@ jobs:
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
-          root: ~/
+          root: ./
           paths:
             - inventory.txt
 
@@ -223,7 +223,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["6b:0d:d5:b7:0c:7a:57:3e:78:a6:22:2d:3f:22:40:c0"]
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Install dependencies
           command: |
@@ -239,7 +239,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Install AWS CLI dependencies
           command: |
@@ -275,7 +275,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Install dependencies
           command: |
@@ -283,7 +283,7 @@ jobs:
             yum -y install nodejs
             yum -y install tar gzip
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Deploy frontend objects
           command: |
@@ -297,7 +297,7 @@ jobs:
             ls ./dist
             aws s3 cp ./dist s3://"udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - frontend/dist
       - destroy-environment:
@@ -312,7 +312,7 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["6b:0d:d5:b7:0c:7a:57:3e:78:a6:22:2d:3f:22:40:c0"]
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Install dependencies
           command: |
@@ -337,7 +337,7 @@ jobs:
     steps:
       - checkout
       - attach_workspace:
-          at: ~/
+          at: .
       - run:
           name: Install dependencies
           command: |
