@@ -37,39 +37,66 @@ commands:
             fi
 
 jobs:
+  install-frontend-dependencies:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: install frontend dependencies
+          command: |
+            cd frontend
+            npm i
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - frontend/node_modules
+
+  install-backend-dependencies:
+    docker:
+      - image: circleci/node:13.8.0
+    steps:
+      - checkout
+      - run:
+          name: install backend dependencies
+          command: |
+            cd backend
+            npm i
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - backend/node_modules
+
   build-frontend:
     docker:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [frontend-build]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Build front-end
           command: |
             cd frontend
-            npm i
             npm run build
-      - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-build
 
   build-backend:
     docker:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [backend-build]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Back-end build
           command: |
             cd backend
             npm i
             npm run build
-      - save_cache:
-          paths: [backend/node_modules]
-          key: backend-build
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - backend/dist
 
   test-frontend:
     docker:
@@ -77,8 +104,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [frontend-build]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Front-end test
           command: |
@@ -93,8 +120,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [backend-build]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Back-end test
           command: |
@@ -107,8 +134,8 @@ jobs:
       - image: circleci/node:13.8.0
     steps:
       - checkout
-      - restore_cache:
-          keys: [frontend-build]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Front-end vulnerability check
           command: |
@@ -120,14 +147,18 @@ jobs:
             cd frontend
             npm audit fix --audit-level=critical --force
           when: on_fail
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - frontend/node_modules
 
   scan-backend:
     executor:
       name: node/default
     steps:
       - checkout
-      - restore_cache:
-          keys: [backend-build]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Backend vulnerability check
           command: |
@@ -141,6 +172,10 @@ jobs:
       - slack/notify:
           event: fail
           template: basic_fail_1
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - backend/node_modules
 
   deploy-infrastructure:
     docker:
@@ -203,8 +238,8 @@ jobs:
       name: node/default
     steps:
       - checkout
-      - restore_cache:
-          keys: [backend-build]
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install AWS CLI dependencies
           command: |
@@ -239,6 +274,8 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
+      - attach_workspace:
+          at: ~/
       - run:
           name: Install dependencies
           command: |
@@ -258,7 +295,11 @@ jobs:
             npm i
             npm run build
             ls ./dist
-            aws s3 sync ./dist s3://"udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --delete
+            aws s3 cp ./dist s3://"udapeople-${CIRCLE_WORKFLOW_ID:0:7}" --recursive
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - frontend/dist
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
