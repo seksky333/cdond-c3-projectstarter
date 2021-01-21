@@ -284,6 +284,7 @@ jobs:
           command: |
             cat ~/inventory.txt
             cd .circleci/ansible
+            export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i ~/inventory.txt deploy-backend.yml -vv
           no_output_timeout: 10m
       - destroy-environment:
