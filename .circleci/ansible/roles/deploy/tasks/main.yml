@@ -1,7 +1,4 @@
 ---
-- name: "show remote environment"
-  shell: env
-
 - name: "copy backend build"
   become: yes
   synchronize:
