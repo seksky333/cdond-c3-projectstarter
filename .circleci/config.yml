@@ -280,11 +280,13 @@ jobs:
           command: |
             apk add --update ansible curl
             ansible --version
+            pip install awscli
+            aws --version
       - run:
           name: Deploy backend
           command: |
-            .circleci/
-            ansible-playbook -i ~/inventory.txt .circleci/ansible/deploy-backend.yml
+            cd /.circleci/ansible
+            ansible-playbook -i ~/inventory.txt deploy-backend.yml
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
