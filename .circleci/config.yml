@@ -131,7 +131,6 @@ jobs:
       - run:
           name: Backend vulnerability check
           command: |
-            echo "Hello world"
             # cd backend
             # npm update
             # npm audit fix --audit-level=critical --force
@@ -307,7 +306,7 @@ jobs:
           command: |
             echo ~/inventory.txt
             BACKEND_IP=$(cat ~/inventory.txt)
-            export API_URL="http://${BACKEND_IP}:3000/api/status"
+            export API_URL="http://${BACKEND_IP}:3030/api/status"
             echo "${API_URL}"
             if curl -s --head ${API_URL} # test if backend exists
             then
@@ -323,7 +322,7 @@ jobs:
             then
               return 1
             else
-              return 0
+              return 1
             fi
       # Here's where you will add some code to rollback on failure
 
