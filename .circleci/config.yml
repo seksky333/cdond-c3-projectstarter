@@ -206,12 +206,12 @@ jobs:
           command: |
             aws cloudformation \
             list-exports --query "Exports[?Name==\`BackendIP\`].Value" \
-            --no-paginate --output text > ~/inventory.txt
-            cat ~/inventory.txt
+            --no-paginate --output text > inventory.txt
+            cat inventory.txt
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
-          root: ~/
+          root: .
           paths:
             - inventory.txt
 
@@ -231,7 +231,7 @@ jobs:
       - run:
           name: Configure server
           command: |
-            ansible-playbook -i ~/inventory.txt .circleci/ansible/configure-server.yml
+            ansible-playbook -i inventory.txt .circleci/ansible/configure-server.yml
 
   run-migrations:
     executor:
@@ -287,8 +287,8 @@ jobs:
       - run:
           name: Deploy frontend objects
           command: |
-            cat ~/inventory.txt
-            BACKEND_IP=$(cat ~/inventory.txt)
+            cat inventory.txt
+            BACKEND_IP=$(cat inventory.txt)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
             cd frontend
@@ -325,10 +325,10 @@ jobs:
           command: |
             ls
             ls ~
-            cat ~/inventory.txt
+            cat inventory.txt
             cd .circleci/ansible
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ~/inventory.txt deploy-backend.yml -vv
+            ansible-playbook -i inventory.txt deploy-backend.yml -vv
           no_output_timeout: 10m
       # - destroy-environment:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
@@ -347,8 +347,8 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            cat ~/inventory.txt
-            BACKEND_IP=$(cat ~/inventory.txt)
+            cat inventory.txt
+            BACKEND_IP=$(cat inventory.txt)
             export API_URL="http://${BACKEND_IP}:3030/api/status"
             echo "${API_URL}"
             if curl -s --head ${API_URL} # test if backend exists
