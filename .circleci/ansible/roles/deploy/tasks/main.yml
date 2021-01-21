@@ -1,11 +1,11 @@
 ---
-- name: Print pwd
-  shell: pwd
+- name: Print ls
+  shell: ls
 
 - name: "copy backend build"
   become: yes
   synchronize:
-    src: ~/backend/dist
+    src: /backend/dist
     dest: /home/ubuntu/udapeople_backend
     recursive: true
 
