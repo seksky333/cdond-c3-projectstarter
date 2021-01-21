@@ -248,15 +248,12 @@ jobs:
       - attach_workspace:
           at: ~/
       - run:
-          name: Get backend url
+          name: Deploy frontend objects
           command: |
             cat ~/inventory.txt
             BACKEND_IP=$(cat ~/inventory.txt)
             export API_URL="http://${BACKEND_IP}:3030"
             echo "${API_URL}"
-      - run:
-          name: Deploy frontend objects
-          command: |
             cd frontend
             npm i
             npm run build
