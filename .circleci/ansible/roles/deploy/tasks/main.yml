@@ -1,15 +1,18 @@
 ---
+- name: Print pwd
+  shell: pwd
+
 - name: "copy backend build"
   become: yes
   synchronize:
-    src: ../../backend/dist
+    src: ~/backend/dist
     dest: /home/ubuntu/udapeople_backend
     recursive: true
 
 - name: "copy backend dependencies"
   become: yes
   synchronize:
-    src: ../../backend/node_modules
+    src: ../backend/node_modules
     dest: /home/ubuntu/udapeople_backend
     recursive: true
 
