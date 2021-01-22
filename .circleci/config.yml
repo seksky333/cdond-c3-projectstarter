@@ -208,6 +208,12 @@ jobs:
             list-exports --query "Exports[?Name==\`BackendIP\`].Value" \
             --no-paginate --output text > inventory.txt
             cat inventory.txt
+      - run:
+          name: Store backend IP in memstash
+          command: |
+            cat inventory.txt
+            BACKEND_IP=$(cat inventory.txt)
+            curl -H "Content-Type: text/plain" -H "token: f0277928-c401-43cb-b56d-743cd9e5d85b" --request PUT --data $BACKEND_IP https://api.memstash.io/values/BACKEND_IP
       # - destroy-environment:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
@@ -347,8 +353,8 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            cat inventory.txt
-            BACKEND_IP=$(cat inventory.txt)
+            BACKEND_IP=$(curl -H "token: f0277928-c401-43cb-b56d-743cd9e5d85b" --request GET https://api.memstash.io/values/BACKEND_URL)
+            echo ${BACKEND_IP}
             export API_URL="http://${BACKEND_IP}:3030/api/status"
             echo "${API_URL}"
             if curl -s --head ${API_URL} # test if backend exists
@@ -360,7 +366,7 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-ap-southeast-2.amazonaws.com"
+            FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-ap-southeast-2.amazonaws.com/index.html"
             if curl -s ${FRONTEND_URL} | grep "Welcome"
             then
               return 1
