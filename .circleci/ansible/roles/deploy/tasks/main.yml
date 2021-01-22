@@ -20,7 +20,6 @@
   shell: |
     env
     pm2 start /home/ubuntu/udapeople_backend/dist/main.js -f
-    pm2 logs
   environment:
     ENVIRONMENT: production
     TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"
