@@ -325,9 +325,10 @@ jobs:
           name: Deploy backend
           command: |
             cat inventory.txt
+            cp inventory.txt .circleci/ansible
             cd .circleci/ansible
             export ANSIBLE_HOST_KEY_CHECKING=False
-            ansible-playbook -i ~/inventory.txt deploy-backend.yml -vv
+            ansible-playbook -i inventory.txt deploy-backend.yml -vv
           no_output_timeout: 10m
       # - destroy-environment:
       #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
