@@ -4,15 +4,17 @@
 
 - name: "copy backend build"
   become: yes
-  copy:
+  synchronize:
     src: ../../backend/dist
     dest: /home/ubuntu/udapeople_backend
+    recursive: true
 
 - name: "copy backend dependencies"
   become: yes
-  copy:
+  synchronize:
     src: ../../backend/node_modules
     dest: /home/ubuntu/udapeople_backend
+    recursive: true
 
 - name: "start server"
   shell: |
