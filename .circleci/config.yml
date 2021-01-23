@@ -34,7 +34,7 @@ commands:
             echo ${MIGRATION_RESULT}
             if [[ $MIGRATION_RESULT = success ]]
             then
-              cd ~/backend
+              cd /backend
               npm install
               npm run migrations:revert
             fi
@@ -374,6 +374,8 @@ jobs:
           name: Install dependencies
           command: |
             apk add --update curl
+            pip install awscli
+            aws --version
       - run:
           name: Backend smoke test.
           command: |
