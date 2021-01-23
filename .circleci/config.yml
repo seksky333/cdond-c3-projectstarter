@@ -22,16 +22,19 @@ commands:
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
+    parameters:
+      workflow_id:
+        type: string
     steps:
       - run:
           name: Revert migrations
-          # Add when this will run11
+          when: on_fail
           command: |
-            # Curl command here to see if there was a successful migration associated with the workflow id, store result in SUCCESS variable
-            SUCCESS = 1
-            if(( $SUCCESS==1 )); 
+            MIGRATION_RESULT=$(curl -H "token: f0277928-c401-43cb-b56d-743cd9e5d85b" --request GET https://api.memstash.io/values/migration_<< parameters.workflow_id >>)
+            echo ${MIGRATION_RESULT}
+            if [[ $MIGRATION_RESULT = success ]]
             then
-              cd ~/project/backend
+              cd ~/backend
               npm install
               npm run migrations:revert
             fi
@@ -387,14 +390,17 @@ jobs:
       - run:
           name: Frontend smoke test.
           command: |
-            FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-ap-southeast-2.amazonaws.com/index.html"
+            FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-ap-southeast-2.amazonaws.com/"
             if curl -s ${FRONTEND_URL} | grep "Welcome"
             then
               return 1
             else
               return 1
             fi
-      # Here's where you will add some code to rollback on failure
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   cloudfront-update:
     docker:
