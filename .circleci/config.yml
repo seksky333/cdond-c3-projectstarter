@@ -199,8 +199,12 @@ jobs:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: yum install -y tar
-      - run: yum install -y gzip
+      - run:
+          name: Install dependencies
+          command: |
+            yum install -y tar gzip
+            curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
+            yum -y install nodejs
       - run:
           name: Ensure back-end infrastructure exists
           command: |
@@ -230,8 +234,10 @@ jobs:
             cat inventory.txt
             BACKEND_IP=$(cat inventory.txt)
             curl -H "Content-Type: text/plain" -H "token: f0277928-c401-43cb-b56d-743cd9e5d85b" --request PUT --data $BACKEND_IP https://api.memstash.io/values/BACKEND_IP
-      # - destroy-environment:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
       - persist_to_workspace:
           root: .
           paths:
@@ -249,11 +255,18 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apk add --update ansible # install the dependencies needed for your playbook
+            apk add --update ansible nodejs npm
+            ansible --version
+            pip install awscli
+            aws --version
       - run:
           name: Configure server
           command: |
             ansible-playbook -i inventory.txt .circleci/ansible/configure-server.yml
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   run-migrations:
     executor:
@@ -291,18 +304,18 @@ jobs:
             fi
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-frontend:
     docker:
       - image: amazon/aws-cli
     steps:
       - checkout
-      - run: yum -y install tar gzip
-      - attach_workspace:
-          at: .
       - run:
           name: Install dependencies
           command: |
+            yum install -y tar gzip
             curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
             yum -y install nodejs
       - attach_workspace:
@@ -325,10 +338,11 @@ jobs:
             - frontend/dist
       - destroy-environment:
           workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   deploy-backend:
     docker:
-      # Docker image here that supports Ansiblez
       - image: python:3.7-alpine3.11
     steps:
       - checkout
@@ -362,8 +376,10 @@ jobs:
             export ANSIBLE_HOST_KEY_CHECKING=False
             ansible-playbook -i inventory.txt deploy-backend.yml -vv
           no_output_timeout: 10m
-      # - destroy-environment:
-      #     workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - destroy-environment:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
+      - revert-migrations:
+          workflow_id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   smoke-test:
     docker:
@@ -397,7 +413,7 @@ jobs:
             FRONTEND_URL="http://udapeople-${CIRCLE_WORKFLOW_ID}.s3-website-ap-southeast-2.amazonaws.com/"
             if curl -s ${FRONTEND_URL} | grep "Welcome"
             then
-              return 1
+              return 0
             else
               return 1
             fi
@@ -414,36 +430,49 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            cd frontend
-            npm i
+            curl -sL https://rpm.nodesource.com/setup_lts.x | bash -
+            yum -y install nodejs
+      - run:
+          name: get deployment information
+          command: |
+            aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text
       - run:
           name: Update cloudfront distribution
           command: |
+            cd .circleci/files
             aws cloudformation deploy \
-            --template-file ./files/cloudfront.yml \
+            --template-file cloudfront.yml \
             --stack-name production-udapeople-frontend \
             --parameter-overrides PipelineID="chez-${CIRCLE_WORKFLOW_ID:0:7}"
-      # Here's where you will add some code to rollback on failure
 
   cleanup:
     docker:
-      # Docker image here
       - image: amazon/aws-cli
     steps:
-      # Checkout code from git
       - checkout
+      - attach_workspace:
+          at: .
       - run:
-          name: Get old stack workflow id
+          name: get deployment information
           command: |
-            export OldWorkflowID="the id here"
-            export STACKS=[] #put the list of stacks here
+            aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text > ~/deployment_id.txt
+      - run: cat ~/deployment_id.txt
       - run:
-          name: Remove old stacks and files
+          name: Get old stack workflow id and remove old stacks and files
           command: |
-            if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
+            OldWorkflowID=$(aws cloudformation \
+            list-exports --query "Exports[?Name==\`WorkflowID\`].Value" \
+            --no-paginate --output text)
+            STACKS="production"
+            if [[ "${OldWorkflowID}" != "${CIRCLE_WORKFLOW_ID:0:7}" ]]
             then
-              aws s3 rm s3://$OldPipelineID --recursive
-              aws cloudformation delete-stack --stack-name $PreviousStackName
+              aws s3 rm s3://udapeople-$OldPipelineID --recursive
+              aws cloudformation delete-stack --stack-name "udapeople-backend-${OldPipelineID}"
+              aws cloudformation delete-stack --stack-name "udapeople-frontend-$OldPipelineID"
             fi
 
 workflows:

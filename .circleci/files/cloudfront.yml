@@ -6,9 +6,7 @@ Parameters:
     Description: Unique identifier.
     Type: String
 
-
 Resources:
-  
   CloudFrontOriginAccessIdentity:
     Type: "AWS::CloudFront::CloudFrontOriginAccessIdentity"
     Properties:
@@ -31,7 +29,6 @@ Resources:
             QueryString: False
           TargetOriginId: webpage
           ViewerProtocolPolicy: allow-all
-
 Outputs:
   WorkflowID:
     Value: !Sub ${WorkflowID}
